@@ -1,0 +1,63 @@
+{
+  "base_rate": {
+    "pooled_brier": 0.24978741496598642,
+    "murphy": {
+      "reliability": 0.017148526077097506,
+      "resolution": 0.0017361111111111127,
+      "uncertainty": 0.234375,
+      "bs_recal": 0.24978741496598642
+    },
+    "by_type": {
+      "money_hi": 0.2602040816326531,
+      "win_a": 0.2393707482993197
+    }
+  },
+  "uniform": {
+    "pooled_brier": 0.25,
+    "murphy": {
+      "reliability": 0.015625,
+      "resolution": 0.0,
+      "uncertainty": 0.234375,
+      "bs_recal": 0.25
+    },
+    "by_type": {
+      "money_hi": 0.25,
+      "win_a": 0.25
+    },
+    "vs_base_rate": {
+      "wins": 9,
+      "losses": 15,
+      "ties": 0,
+      "p": 0.30745625495910645
+    },
+    "gate": {
+      "delta_brier": 0.0002,
+      "rel_regression": -0.0015,
+      "verdict": "HOLD"
+    }
+  },
+  "act_majority": {
+    "pooled_brier": 0.2267687074829932,
+    "murphy": {
+      "reliability": 0.037532596371882096,
+      "resolution": 0.04513888888888889,
+      "uncertainty": 0.234375,
+      "bs_recal": 0.2267687074829932
+    },
+    "by_type": {
+      "money_hi": 0.2602040816326531,
+      "win_a": 0.19333333333333336
+    },
+    "vs_base_rate": {
+      "wins": 10,
+      "losses": 2,
+      "ties": 12,
+      "p": 0.03857421875
+    },
+    "gate": {
+      "delta_brier": -0.023,
+      "rel_regression": 0.0204,
+      "verdict": "HOLD"
+    }
+  }
+}

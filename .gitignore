@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+results/ledger.jsonl
+tasks/tasks_v1.json
