@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "q-one-gym"
+version = "0.1.0"
+description = "A reproducible gym for calibrated decision-making: clairvoyance-tested baselines, tamper-evident ledger, Brier/Murphy scoring"
+requires-python = ">=3.10"
+authors = [{ name = "Liu Zewen" }]
+readme = "README.md"
+
+[tool.setuptools]
+packages = ["gym"]
