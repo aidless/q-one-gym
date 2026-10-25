@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Freeze the v1 task set from data/games.csv (seed 20261023). Appends nothing later."""
-import csv, json, random, hashlib
+import csv, json, os, random, hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = Path('/home/liuzewen/文档/求职demo/agent-databench/data/games.csv')
+SRC = Path(os.environ.get('GAMES_CSV', ROOT / 'data' / 'games.csv'))  # games.csv 源自 agent-databench/data；用 GAMES_CSV 指定实际位置
 OUT = ROOT / 'tasks' / 'tasks_v1.json'
 SEED = 20261023
 MONEY_HI = 110000.0
