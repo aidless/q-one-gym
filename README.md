@@ -42,6 +42,17 @@ act_majority 对 base_rate 的 McNemar `p=0.0386`（10 wins / 2 losses / 12 ties
 但**门 `gate.verdict = HOLD`**（`rel_regression=0.0204 > 0`，校准回归不合格，
 不提升）。
 
+## Fail-closed 声明
+
+本健身房**默认 fail-closed**（对「假装提升」零容忍）：
+
+- **推广门全拒绝**：候选只被推广当**全部**冻结判据满足（`ΔBrier ≤ −0.02` ∧ 无可靠性回归 > 0.02 ∧ canary 一致 ∧ 未对 held-out 迭代）。否则**唯一合法结局是 HOLD**——记录进账本，**不静默重试**，**不因单指标显著而提升**（`act_majority` 虽 McNemar p=0.0386 显著，但因 `rel_regression=0.0204 > 0` 门 HOLD）。
+- **账本 append-only + 哈希链**：每个预测/结果/门控决策是哈希链事件；`run.py --verify` 重放整条链，任何不一致即失败。
+- **LLM 判断是建议证据，永不自动执行任何事**（协议红线）。
+- **held-out 集冻结**：任何 prompt/模型/heuristic 不得对 held-out 迭代；违反即候选永久取消资格。
+
+> 立场：宁可不推广、宁可 HOLD，也不在未满足全部判据时放行。fail-closed 意味着「不满足冻结规则就不提升」，而不是「看着像赢了就提升」。
+
 ## 证明什么 / 不证明什么
 
 **证明什么**：
