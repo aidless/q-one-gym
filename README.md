@@ -1,5 +1,7 @@
 # Q-One Gym
 
+[![CI](https://github.com/aidless/q-one-gym/actions/workflows/checks.yml/badge.svg)](https://github.com/aidless/q-one-gym/actions/workflows/checks.yml)
+
 **A reproducible gym for calibrated decision-making under uncertainty — with a hash-chained forecast ledger and externally-gated self-improvement.**
 
 The frontier claim (honest): the five components below each exist in prior work, but **no open system combines them**. Q-One Gym is that combination, in ~600 lines you can audit in an afternoon.
