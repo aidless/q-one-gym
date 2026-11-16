@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "q-one-gym"
 version = "0.1.0"
-description = "A reproducible gym for calibrated decision-making: clairvoyance-tested baselines, tamper-evident ledger, Brier/Murphy scoring"
+description = "Offline Brier scores for three heuristics on 80 tasks from 40 game episodes. Held-out n=24 is below this project's n<30 display cutoff, so the gate stays HOLD. No LLM results."
 requires-python = ">=3.10"
 authors = [{ name = "Liu Zewen" }]
 readme = "README.md"

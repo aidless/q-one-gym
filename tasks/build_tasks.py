@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Freeze the v1 task set from data/games.csv (seed 20261023). Appends nothing later."""
+"""Freeze the v1 task set from data/games.csv (seed 20261023). Appends nothing later.
+
+The default input is the vendored file data/games.csv. Set GAMES_CSV to override
+it. Provenance is data/PROVENANCE.md. The JSON written here is the frozen task
+set; changing the serialization changes sha256 prefix add2402464df8e75.
+"""
 import csv, json, os, random, hashlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = Path(os.environ.get('GAMES_CSV', ROOT / 'data' / 'games.csv'))  # games.csv 源自 agent-databench/data；用 GAMES_CSV 指定实际位置
+SRC = Path(os.environ.get('GAMES_CSV', ROOT / 'data' / 'games.csv'))
 OUT = ROOT / 'tasks' / 'tasks_v1.json'
 SEED = 20261023
 MONEY_HI = 110000.0
