@@ -39,3 +39,17 @@ Otherwise the outcome is **HOLD** — recorded, not retried silently. Gate decis
 ## Non-goals / non-claims
 
 No causal claims; no leaderboard generalization beyond this frozen set; v0 backtests outcomes already fixed at generation time; LLM forecasts are advice evidence, never auto-executed objectives.
+
+## Amendment 2026-11-16 (appended; the v1.0 text above is unchanged)
+
+1. Data location. `data/games.csv` is vendored in this repository. Byte sha256, source commits, and the license limits of that copy are in `data/PROVENANCE.md`. Rebuilding with `tasks/build_tasks.py` still yields task-set sha256 prefix `add2402464df8e75` (train 56, held-out 24).
+
+2. Feature timing and the CC0 label. The pass/act columns in the task-set section are full-episode counts from agent-databench `tasks/build_games_from_episodes.py` (summed over every step). They were not measured before the winner was known. Features still omit `winner` and the money columns. That is the only separation this task set has. "CC0 Kaggle dump, unchanged" is the upstream repository's description. This gym did not re-fetch a Kaggle archive and does not independently verify CC0. See `data/PROVENANCE.md`.
+
+3. Gate runner. `gym.scoring.promotion_gate` returns PROMOTE only when `n_held` ≥ 30 and rules 1–4 are all checked and passed. At n=24 the Murphy terms stay display-only, so the verdict is HOLD even if ΔBrier ≤ −0.02. The current runner does not execute the canary check or the iteration-log audit; those arguments are passed as not-run, which is also HOLD. This amendment does not relax rules 1–4 and does not promote any forecaster. On this split, `act_majority` does meet the numeric ΔBrier cut and misses the numeric reliability cut; neither fact is used as a diagnosis while n<30.
+
+4. Bootstrap intervals. Pooled Brier is also reported with a percentile bootstrap 95% interval (2000 resamples, nearest rank, seed 20261023). The interval is descriptive. It is not a promotion criterion. The v1.0 ban on further inferential claims at this sample size still applies.
+
+5. The n<30 cutoff remains this project's display rule, as written above. It is not a sample-size theorem quoted from Stephenson, Coelho, and Jolliffe (2008). That paper is about extra within-bin terms in a binned Brier decomposition.
+
+6. No LLM forecaster result is added.

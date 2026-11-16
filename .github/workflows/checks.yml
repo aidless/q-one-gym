@@ -17,4 +17,4 @@ jobs:
       # so `unittest discover` collected nothing and exited 5 -- a red gate that
       # never ran an assertion.
       - run: python -m pip install pytest
-      - run: python -m pytest tests -q
+      - run: make check

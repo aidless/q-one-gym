@@ -2,100 +2,63 @@
 
 [![CI](https://github.com/aidless/q-one-gym/actions/workflows/checks.yml/badge.svg)](https://github.com/aidless/q-one-gym/actions/workflows/checks.yml)
 
-**A reproducible gym for calibrated decision-making under uncertainty — with a hash-chained forecast ledger and externally-gated self-improvement.**
+Offline Brier scores for three heuristics on 80 tasks from 40 game episodes.
+Held-out n=24 is below this project's n<30 display cutoff, so the gate stays HOLD.
+No LLM results.
 
-The frontier claim (honest): the five components below each exist in prior work, but **no open system combines them**. Q-One Gym is that combination, in ~600 lines you can audit in an afternoon.
+STATUS: WORK-IN-PROGRESS — not A yet. The GitHub About description is still the old five-feature sentence. Replace it with the three sentences above. This change cannot edit that setting.
 
-| Component | Closest prior art | What Q-One Gym adds |
-|---|---|---|
-| Auto-resolvable forecast tasks | ForecastBench | tasks are *decisions* with clairvoyance-tested resolution (Metaculus-style), resolvable by computation over a frozen dataset — zero API cost, zero contamination |
-| Reference-class baseline | Flyvbjerg RCF | the base rate is a first-class forecaster every candidate must beat |
-| Append-only forecast ledger | q-one-core protocol | every forecast/outcome/gate decision is hash-chained; `verify` replays the chain |
-| Calibration reporting | Murphy decomposition | Brier is reported as reliability − resolution + uncertainty; n<30 ⇒ display-only |
-| Gated self-improvement | RLVR / RaR | frozen held-out set never touched by iteration; canary consistency checks; promotion rule frozen in [PREREG.md](PREREG.md) |
+## Headline
 
-Protocol red line (from [SYNTHESIS](https://github.com/aidless/q-one-core/blob/main/docs/SYNTHESIS.md)): **LLM judgments are advice evidence, never automatic optimization targets.** No forecast ever auto-executes anything.
+`make check` rebuilds this block from `data/games.csv`. A mismatch fails the check.
 
-## Quickstart
+<!-- HEADLINE:START -->
+task_sha256_16=add2402464df8e75 train=56 held_out=24
+base_rate brier=0.2498 ci95=[0.1906, 0.3093] rel=0.0171 res=0.0017 unc=0.2344 display_only=true
+uniform brier=0.2500 ci95=[0.2500, 0.2500] rel=0.0156 res=0.0000 unc=0.2344 display_only=true sign_wins=9 sign_losses=15 sign_ties=0 sign_p=0.3075 delta=+0.0002 rel_gap=-0.0015 gate=HOLD reasons=n_below_30_murphy_display_only,delta_brier_not_le_-0.02,canary_check_not_run,held_out_iteration_log_not_audited
+act_majority brier=0.2268 ci95=[0.1646, 0.2914] rel=0.0375 res=0.0451 unc=0.2344 display_only=true sign_wins=10 sign_losses=2 sign_ties=12 sign_p=0.0386 delta=-0.0230 rel_gap=+0.0204 gate=HOLD reasons=n_below_30_murphy_display_only,reliability_regression_gt_0.02_display_only,canary_check_not_run,held_out_iteration_log_not_audited
+llm_results=none
+<!-- HEADLINE:END -->
+
+`ci95` is a percentile bootstrap interval (2000 resamples, nearest rank, seed 20261023). It describes the pooled Brier. It does not promote a forecaster. `display_only=true` means the Murphy reliability, resolution, and uncertainty terms are shown and are not a diagnosis. `uniform`'s interval is a point because a forecast of 0.5 has squared error 0.25 on every binary outcome. `act_majority`'s interval contains the base-rate point estimate. Both gates are HOLD: n=24 is below the cutoff, the canary check and the held-out iteration audit are not run, and `act_majority`'s reliability gap is recorded but not used as a diagnosis. The sign counts are an exact binomial sign test on per-task Brier wins and losses.
+
+## Reproduce
 
 ```bash
-python3 tasks/build_tasks.py          # freeze task set + SHA-256 (seed 20261023)
-python3 run.py --offline              # baselines end-to-end: ledger, scores, report
-python3 run.py --verify               # replay the hash chain
-python3 -m pytest tests/ -q           # unit tests (scoring + ledger)
-# optional LLM forecaster (any OpenAI-compatible endpoint; slow on CPU):
+python3 -m pip install pytest   # the only third-party package
+make check                      # offline: rebuild tasks, rescore, diff this file, run tests
+```
+
+`make check` does not use the network and ignores `GAMES_CSV`. It expects a fresh ledger of 6 events. `python3 run.py --offline` appends to `results/ledger.jsonl` if that file already exists; `python3 run.py --verify` replays the hash chain and exits non-zero if an event was altered.
+
+An OpenAI-compatible forecaster is optional and is not part of the check:
+
+```bash
 LLM_BASE_URL=http://127.0.0.1:11434/v1 LLM_MODEL=qwen2.5:7b python3 run.py --llm
 ```
 
-Outputs land in `results/` (JSONL ledger + report). The report's headline table: **did any forecaster beat the reference class on the frozen held-out set?**
+No such run is recorded in `results/`.
 
-### Captured output (2026-11-10 re-run, fresh clone state)
+## What was scored
 
-```text
-$ GAMES_CSV=../agent-databench/data/games.csv python3 tasks/build_tasks.py
-frozen: train=56 held_out=24 sha256=add2402464df8e75
+| Name | Probability | On this held-out split |
+|---|---|---|
+| `base_rate` | Training-split outcome frequency for that task type | Reference value. Not a promotion candidate. |
+| `uniform` | 0.5 | HOLD |
+| `act_majority` | 0.6 if `act_a > act_b`, else 0.4, on `win_a` only; otherwise `base_rate` | HOLD |
 
-$ python3 run.py --offline          (tail)
-  "act_majority": {
-    "pooled_brier": 0.2268,
-    "gate": "HOLD"
-  }
-}
-ledger: 6 events OK                 # one --offline run appends 6 events
+Tasks are built from the vendored 40-row table (`data/PROVENANCE.md`) by `tasks/build_tasks.py` with seed 20261023. `win_a` asks whether side a won. `money_hi` asks whether the winner's final money exceeded 110000. The split is 70/30 by type.
 
-$ python3 run.py --verify
-(True, '6 events OK')
+## Related work
 
-$ python3 -m pytest tests/ -q
-6 passed in 0.02s
-```
+ForecastBench scores forecasts of future events that have no known answer at submission time (Karger, Bastani, Yueh-Han, Jacobs, Halawi, Zhang, and Tetlock, ICLR 2025, [arXiv:2409.19839](https://arxiv.org/abs/2409.19839)). This repository does not use ForecastBench questions, code, or leaderboard. The labels here are already columns in a 40-row table.
 
-## Results (committed `results/report_v1.json`)
+Reference class forecasting, as defined by Flyvbjerg (2006, *Project Management Journal* 37(3), 5–15, [doi:10.1177/875697280603700302](https://doi.org/10.1177/875697280603700302)), places a project in the outcome distribution of comparable past projects. `base_rate` is the training-split mean of a binary label. It is not that procedure.
 
-| Forecaster | pooled Brier (24 held-out) | Δ vs base rate | McNemar vs base rate | Gate |
-|---|---|---|---|---|
-| base_rate (reference class) | 0.2498 | — | — | — |
-| uniform | 0.2500 | +0.0002 | wins 9 / losses 15 / ties 0, p = 0.3075 | **HOLD** |
-| act_majority | **0.2268** | −0.0230 | wins 10 / losses 2 / ties 12, **p = 0.0386** | **HOLD** |
+The reliability − resolution + uncertainty split of the Brier score is the Murphy decomposition (Murphy, 1973, *Journal of Applied Meteorology* 12(4), 595–600, [doi:10.1175/1520-0450(1973)012<0595:ANVPOT>2.0.CO;2](https://doi.org/10.1175/1520-0450(1973)012%3C0595:ANVPOT%3E2.0.CO;2)). Binned components need extra within-bin terms when a bin contains more than one probability (Stephenson, Coelho, and Jolliffe, 2008, *Weather and Forecasting* 23(4), 752–757, [doi:10.1175/2007WAF2006116.1](https://doi.org/10.1175/2007WAF2006116.1)). The identity checked in `gym/scoring.py` is reliability − resolution + uncertainty against the Brier score of the bin-mean probabilities. The n<30 display cutoff is this project's rule (`PREREG.md`), not a threshold stated in that 2008 paper.
 
-Reading: `act_majority` beats the reference class with McNemar p = 0.0386 (< 0.05)
-and ΔBrier = −0.023, but the frozen promotion rule still says **HOLD** — n = 24
-held-out tasks is below the preregistered evidence bar ([PREREG.md](PREREG.md);
-Murphy decomposition and n<30 display-only rule in `gym/scoring.py`). Nothing is
-promoted; the ledger records the HOLD decision.
+## Limits
 
-## Task types (v0, frozen)
-
-Generated from `data/games.csv` (40 game episodes, CC0; copy from agent-databench):
-
-- **`win_a`** — given pre-outcome stats (seed, pass turns, act turns for both sides), forecast P(winner = side a). Outcome resolved by the `winner` column.
-- **`money_hi`** — forecast P(winning side's final money > 110,000). Resolved by computation.
-
-Both are backtest tasks: outcomes were frozen at generation time; models cannot "know" them except through the features. Clairvoyance check: a person with the CSV and no context can resolve every task mechanically.
-
-## Repository layout
-
-```
-PREREG.md            frozen pre-registration (design, split, promotion rule) — v1.0
-tasks/build_tasks.py task generator + SHA-256 freeze
-gym/scoring.py       Brier, Murphy decomposition, interval score, McNemar counts
-gym/ledger.py        append-only hash-chained event ledger (q-one-core shape)
-gym/baselines.py     reference-class (base rate), uniform, act-majority heuristic
-run.py               offline / llm / verify entrypoints
-tests/               unit tests
-```
-
-## Scope (non-claims)
-
-v0 is a backtest gym on 80 tasks from one dataset — small on purpose: the point is the *protocol* (ledger + decomposition + external gates), not a leaderboard number. The path to M2 (break the plateau) is: candidates (prompts/models/routing) are promoted only by the frozen rule on the frozen set. Everything else stays HOLD.
-
-### Limits
-
-- One dataset (40 CC0 game episodes → 80 tasks), one offline run: no cross-domain
-  evidence, no LLM-forecaster numbers committed (`--llm` path exists but no run
-  with a real endpoint is recorded in `results/`).
-- Held-out set is 24 tasks — below the n ≥ 30 bar, so all gates correctly return
-  HOLD even where McNemar p < 0.05.
-- Baselines are heuristics (uniform / act-majority), not model forecasts.
+Read [FAILURE_MODES.md](FAILURE_MODES.md) before treating the point estimates as a finding. The frozen promotion rule and the 2026-11-16 amendment are in [PREREG.md](PREREG.md). There is no self-improvement loop. Nothing here is a claim that some combination of ledger, decomposition, and gate is missing from other open systems.
 
 *Author: Zewen Liu (Independent Researcher) · [github.com/aidless](https://github.com/aidless)*
