@@ -68,6 +68,25 @@ def extract_headline(text):
     return inner
 
 
+def report_fingerprint(obj, digits=10):
+    """Stable view of a report for `make check`.
+
+    CPython 3.10 and 3.12 can disagree by one unit in the last place on the
+    same sum of squares (act_majority pooled Brier 0.2267687074829932 versus
+    0.22676870748299327). Ten decimal places keep that bit from failing the
+    check. The README headline still locks four decimal places.
+    """
+    if isinstance(obj, bool) or obj is None or isinstance(obj, int):
+        return obj
+    if isinstance(obj, float):
+        return f"{obj:.{digits}f}"
+    if isinstance(obj, dict):
+        return {k: report_fingerprint(v, digits) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [report_fingerprint(v, digits) for v in obj]
+    return obj
+
+
 def assert_v1_numbers(report):
     """Locks the recomputed v1 offline result. Raises AssertionError on drift."""
     assert round(report["base_rate"]["pooled_brier"], 4) == 0.2498

@@ -176,6 +176,14 @@ def test_labels_resolve_from_csv_columns():
         assert 'y' not in win['features']
 
 
+def test_report_fingerprint_ignores_one_ulp():
+    from gym.headline import report_fingerprint
+    committed = {"point": 0.2267687074829932}
+    fresh = {"point": 0.22676870748299327}
+    assert report_fingerprint(committed) == report_fingerprint(fresh)
+    assert report_fingerprint({"brier": 0.2268}) != report_fingerprint({"brier": 0.2279})
+
+
 def test_readme_headline_extractor_rejects_a_different_block():
     from gym.headline import extract_headline
     text = "<!-- HEADLINE:START -->\nalpha\n<!-- HEADLINE:END -->"

@@ -26,6 +26,7 @@ from gym.headline import (  # noqa: E402
     TASK_SHA16,
     extract_headline,
     format_headline,
+    report_fingerprint,
 )
 
 
@@ -103,10 +104,12 @@ def main():
 
     committed_path = ROOT / "results" / "report_v1.json"
     committed = json.loads(committed_path.read_text())
-    if report != committed:
+    fresh_fp = report_fingerprint(report)
+    committed_fp = report_fingerprint(committed)
+    if fresh_fp != committed_fp:
         print("committed results/report_v1.json does not match a fresh offline run", file=sys.stderr)
-        fresh = json.dumps(report, sort_keys=True, indent=2)
-        old = json.dumps(committed, sort_keys=True, indent=2)
+        fresh = json.dumps(fresh_fp, sort_keys=True, indent=2)
+        old = json.dumps(committed_fp, sort_keys=True, indent=2)
         for left, right in zip(fresh.splitlines(), old.splitlines()):
             if left != right:
                 print(f"- {right}", file=sys.stderr)
