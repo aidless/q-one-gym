@@ -1,0 +1,19 @@
+{
+  "started_at": "2026-11-02T02:49:04.729707+00:00",
+  "unit_tests": {
+    "exit": 0,
+    "passed": "in"
+  },
+  "offline": {
+    "exit": 0,
+    "scores": {
+      "_error": "{\n  \"base_rate\": {\n    \"pooled_brier\": 0.2498\n  },\n  \"uniform\": {\n    \"pooled_brier\": 0.25,\n    \"gate\": \"HOLD\"\n  },\n  \"act_majority\": {\n    \"pooled_brier\": 0.2268,\n    \"gate\": \"HOLD\"\n  }\n}\nledger: 26 events OK"
+    },
+    "ledger_line": "ledger: 26 events OK"
+  },
+  "verify": {
+    "exit": 0,
+    "ok": true,
+    "output": "(True, '26 events OK')"
+  }
+}
